@@ -1,0 +1,40 @@
+# CI Pipeline for Scenario 2 created by Arnold Babu
+name: Arnold Babu Scenario 2 CI
+
+# Trigger the workflow automatically on every git push to the main branch
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Clone the repository files onto the virtual machine runner
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Initialize a standardized Python environment
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      # Install dependencies (flake8) from requirements.txt
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # Run linting with flake8 to check syntax and PEP 8 style rules
+      - name: Run Linting (flake8)
+        run: |
+          # stop the build if there are Python syntax errors or undefined names
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          # exit-zero treats all style warnings as errors if formatting is incorrect
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+      # Execute all unit tests using the Python unittest framework
+      - name: Run Unit Tests
+        run: python -m unittest test_calculator.py -v
